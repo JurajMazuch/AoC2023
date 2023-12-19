@@ -5,24 +5,36 @@ import re
 def part1(scratchcards_pile):
     points_sum = 0
     for scratchcard in scratchcards_pile:
-        points = 0
-        scratchcard = re.sub(r'Card \d+: ', '', scratchcard)
-        winning_numbers = re.findall(r'\d+', scratchcard.split('|')[0])
-        my_numbers = re.findall(r'\d+', scratchcard.split('|')[1])
+        winning_numbers = set(re.findall(r'\d+', scratchcard.replace(':', '|').split('|')[1]))
+        my_numbers = set(re.findall(r'\d+', scratchcard.replace(':', '|').split('|')[2]))
 
-        for number in set(winning_numbers) & set(my_numbers):
-            points = max(1, points * 2)
+        my_winning_numbers_count = len(winning_numbers & my_numbers)
 
-        points_sum += points
+        if my_winning_numbers_count > 0:
+            points_sum += pow(2, my_winning_numbers_count - 1)
+
     return points_sum
 
 
-def part2(lines):
-    return 0
+def part2(scratchcards_pile, i):
+    scratchcard = scratchcards_pile[i - 1]
+    winning_numbers = set(re.findall(r'\d+', scratchcard.replace(':', '|').split('|')[1]))
+    my_numbers = set(re.findall(r'\d+', scratchcard.replace(':', '|').split('|')[2]))
+
+    scratchcards_count = len(winning_numbers & my_numbers)
+
+    for j in range(1, scratchcards_count + 1):
+        scratchcards_count += part2(scratchcards_pile, i + j)
+
+    return scratchcards_count
 
 
-with open(os.path.join(os.path.dirname(__file__), 'D04_Test.txt'), 'r') as file:
+with open(os.path.join(os.path.dirname(__file__), 'D04.txt'), 'r') as file:
     input_lines = file.readlines()
 
 print("Part 1:", part1(input_lines))
-print("Part 2:", part2(input_lines))
+
+scratchcards_count = len(input_lines)
+for i in range(1, scratchcards_count + 1):
+    scratchcards_count += part2(input_lines, i)
+print("Part 2:", scratchcards_count)
